@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record model="ir.ui.view" id="zkteco_device_attendance_calculation_from_view_wizard">
+            <field name="name">zkteco.device.attendance.calculation.from.view.wizard</field>
+            <field name="model">zkteco.calculation.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Attendance Calculation">
+                    <p class="oe_grey">
+                        <h4>Calculate Attendance Records</h4>
+                    </p>
+
+                    <footer>
+                        <button name="calculate_attendance"
+                                string="Calculate"
+                                type="object"
+                                class="oe_highlight"/>
+
+                        <button string="Cancel"
+                                class="oe_link"
+                                special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="action_calculate_attendance_device_wizard">
+            <field name="name">Calculate User Attendance</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">zkteco.calculation.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="zkteco_device_attendance_calculation_from_view_wizard"/>
+            <field name="target">new</field>
+        </record>
+    </data>
+</odoo>

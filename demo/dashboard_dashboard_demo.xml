@@ -1,0 +1,5 @@
+<odoo>
+    <record id="dashboard_dashboard_demo_today" model="dashboard.dashboard">
+        <field name="dashboard_data_filter">today</field>
+    </record>
+</odoo>

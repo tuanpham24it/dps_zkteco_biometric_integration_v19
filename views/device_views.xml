@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="zkteco_device_stamp_logs_form_view" model="ir.ui.view">
+        <field name="name">zkteco.device.stamp.logs.form.view</field>
+        <field name="model">device.operation.stamplogs</field>
+        <field name="arch" type="xml">
+            <form string="Device Command Execution Logs">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="log_date"/>
+                        <field name="log_text"/>
+                        <field name="opStamp"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="zkteco_device_stamp_logs_tree_view" model="ir.ui.view">
+        <field name="name">zkteco.device.stamp.logs.tree.view</field>
+        <field name="model">device.operation.stamplogs</field>
+        <field name="arch" type="xml">
+            <list string="Device Command Execution Logs">
+                <field name="name"/>
+                <field name="log_date"/>
+                <field name="log_text"/>
+                <field name="opStamp"/>
+            </list>
+        </field>
+    </record>
+
+
+    <record id="zkteco_device_s_logs_form_view" model="ir.ui.view">
+        <field name="name">zkteco.device.s.logs.form.view</field>
+        <field name="model">device.stamp.logs</field>
+        <field name="arch" type="xml">
+            <form string="Device Operation Stamp Log">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="log_date"/>
+                        <field name="log_text"/>
+                        <field name="device_id" invisible="1"/>
+                        <field name="stamp"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="zkteco_device_s_logs_tree_view" model="ir.ui.view">
+        <field name="name">zkteco.device.s.logs.tree.view</field>
+        <field name="model">device.stamp.logs</field>
+        <field name="arch" type="xml">
+            <list string="Device Operation Stamp Logs">
+                <field name="name"/>
+                <field name="log_date"/>
+                <field name="log_text"/>
+                <field name="device_id"/>
+                <field name="stamp"/>
+            </list>
+        </field>
+    </record>
+
+
+    <record id="zkteco_biometric_device_commands_tree_view" model="ir.ui.view">
+        <field name="name">zkteco.biometric.device.commands.tree.view</field>
+        <field name="model">zkteco.dcmmand</field>
+        <field name="arch" type="xml">
+            <list string="Device Commands">
+                <field name="name"/>
+                <field name="device_id"/>
+                <field name="pin"/>
+                <field name="status" widget="badge"
+                       decoration-info="status in ('executed','pending')"
+                       decoration-success="status=='success'"
+                       decoration-danger="status=='failed'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="zkteco_biometric_device_commands_form_view" model="ir.ui.view">
+        <field name="name">zkteco.biometric.device.commands.form.view</field>
+        <field name="model">zkteco.dcmmand</field>
+        <field name="arch" type="xml">
+            <form string="ZKTeco Device Command Details">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="device_id"/>
+                        <field name="employee_id"/>
+                        <field name="pin"/>
+                        <field name="status"/>
+                    </group>
+                    <group>
+                        <field name="execution_log"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_zkteco_device_biometric_commands" model="ir.actions.act_window">
+        <field name="name">Biometric Device Commands</field>
+        <field name="res_model">zkteco.dcmmand</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="zkteco_device_logs_data_tree_view" model="ir.ui.view">
+        <field name="name">zkteco.device.logss.data.tree.view</field>
+        <field name="model">zkteco.device.event.log</field>
+        <field name="arch" type="xml">
+            <list string="Attendance Data Logs">
+                <field name="device_id"/>
+                <field name="log_code"/>
+                <field name="description"/>
+                <field name="operator"/>
+                <field name="op_time"/>
+                <field name="value_1"/>
+                <field name="value_2"/>
+                <field name="value_3"/>
+                <field name="reserved"/>
+                <field name="opStamp"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="zkteco_device_logs_data_form_view" model="ir.ui.view">
+        <field name="name">zkteco.device.logss.data.form.view</field>
+        <field name="model">zkteco.device.event.log</field>
+        <field name="arch" type="xml">
+            <form string="Attendance Data Log Details">
+                <sheet>
+                    <group>
+                        <field name="device_id"/>
+                        <field name="log_code"/>
+                        <field name="description"/>
+                        <field name="op_time"/>
+                    </group>
+                    <group>
+                        <field name="operator"/>
+                        <field name="value_1"/>
+                        <field name="value_2"/>
+                        <field name="value_3"/>
+                        <field name="reserved"/>
+                        <field name="opStamp"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_zkteco_device_data_logs" model="ir.actions.act_window">
+        <field name="name">Device Attendance Data Logs</field>
+        <field name="res_model">zkteco.device.event.log</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+</odoo>

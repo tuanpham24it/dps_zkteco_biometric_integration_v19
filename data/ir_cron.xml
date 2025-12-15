@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="cron_schedule_action_calculate_attendance" model="ir.cron" forcecreate="True">
+            <field name="name">Run Attendance Calculation</field>
+            <field name="model_id" ref="model_zkteco_calculation_wizard"/>
+            <field name="state">code</field>
+            <field name="code">model.calculate_attendance()</field>
+            <field name="active" eval="True"/>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="nextcall" eval="(DateTime.now() + timedelta(days=1)).strftime('%Y-%m-%d 05:30:00')"/>
+        </record>
+
+
+        <record id="cron_schedule_action_download_attendance" model="ir.cron" forcecreate="True">
+            <field name="name">Download Existing Attendance</field>
+            <field name="model_id" ref="model_zkteco_device_setting"/>
+            <field name="state">code</field>
+            <field name="code">model.action_pull_attendance_logs_new()</field>
+            <field name="active" eval="True"/>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="nextcall" eval="(DateTime.now() + timedelta(days=1)).strftime('%Y-%m-%d 05:30:00')"/>
+        </record>
+    </data>
+</odoo>

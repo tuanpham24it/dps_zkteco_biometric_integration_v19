@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="zkteco_device_user_report" model="ir.ui.view">
+            <field name="name">zkteco.device.user.report</field>
+            <field name="model">employee.attendance.report</field>
+            <field name="arch" type="xml">
+                <form string="Attendance Report Wizard">
+                    <field name="is_printed" nolabel="1" readonly="1" invisible="1"/>
+                    <group colspan="4" invisible="is_printed == True">
+                        <group>
+                            <field name="attendance_report_format"/>
+                            <field name="employee_ids" widget="many2many_tags"/>
+                            <field name="attendance_excel_sheet_name"/>
+                        </group>
+                        <group>
+                            <field name="report_date_start_from"/>
+                            <field name="report_date_end_to"/>
+                        </group>
+                    </group>
+                    <group colspan="4" invisible="is_printed != True">
+                        <field name="employee_attendance_report_file_store" widget="binary" nolabel="1" filename="employee_attendance_report_name" colspan="4"/>
+                        <field name="employee_attendance_report_name" nolabel="1" readonly="1" invisible="1"/>
+                    </group>
+
+                    <footer>
+                        <button name="print_employee_attendance_in_excel" string="Export Attendance" type="object"
+                                class="oe_highlight"
+                                invisible="is_printed == True"/>
+
+                        <button name="action_go_backword" string="Back" class="btn btn-default"
+                                type="object"
+                                invisible="is_printed != True"/>
+
+                        <button string="Cancel" class="oe_link" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="action_zkteco_device_report_dps">
+            <field name="name">ZKTeco User Attendance Report</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">employee.attendance.report</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="zkteco_device_user_report"/>
+            <field name="target">new</field>
+        </record>
+    </data>
+</odoo>

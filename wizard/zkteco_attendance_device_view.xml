@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="zkteco_attendance_device_form_view" model="ir.ui.view">
+        <field name="name">zkteco.device.wizard.form</field>
+        <field name="model">zkteco.device.wizard</field>
+        <field name="arch" type="xml">
+            <form>
+                <p class="oe_grey">
+                    <h5>Select ZKTeco Device</h5>
+                </p>
+                <group colspan="4">
+                    <group>
+                        <field name="operation_type" invisible="1"/>
+                        <field name="zkteco_device_ids" widget="many2many_tags"/>
+                    </group>
+                </group>
+                <footer>
+                    <button name="validate_biometric_update"
+                            type="object" class="oe_highlight" string="Update"
+                            invisible="operation_type != 'update'"/>
+
+                    <button name="action_confirm_biometric_scan"
+                            type="object" class="oe_highlight" string="Scan"
+                            invisible="operation_type != 'scan'"/>
+
+                    <button name="action_unlink_zkteco_device_employee"
+                            type="object" class="oe_highlight" string="Remove"
+                            invisible="operation_type != 'remove'"/>
+
+                    <button string="Cancel" class="oe_link" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="action_zkteco_device_scan_with_biometric">
+        <field name="name">Scan User with ZKTeco Device</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">zkteco.device.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="binding_model_id" ref="hr.model_hr_employee"/>
+        <field name="view_id" ref="zkteco_attendance_device_form_view"/>
+        <field name="context">{'default_operation_type': 'scan'}</field>
+        <field name="target">new</field>
+    </record>
+
+    <record model="ir.actions.act_window" id="action_zkteco_device_update_with_biometric">
+        <field name="name">Update User to ZKTeco Device</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">zkteco.device.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="binding_model_id" ref="hr.model_hr_employee"/>
+        <field name="view_id" ref="zkteco_attendance_device_form_view"/>
+        <field name="context">{'default_operation_type': 'update'}</field>
+        <field name="target">new</field>
+    </record>
+
+    <record model="ir.actions.act_window" id="action_zkteco_device_remove_with_biometric">
+        <field name="name">Remove User from ZKTeco Device</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">zkteco.device.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="binding_model_id" ref="hr.model_hr_employee"/>
+        <field name="view_id" ref="zkteco_attendance_device_form_view"/>
+        <field name="context">{'default_operation_type': 'remove'}</field>
+        <field name="target">new</field>
+    </record>
+
+    <record model="ir.ui.view" id="success_wizard_views">
+        <field name="name">zkteco_success.views</field>
+        <field name="model">zkteco_success</field>
+        <field name="arch" type="xml">
+            <form string="Success Message">
+                <group>
+                    <p class="oe_black">
+                        <h5>Employee Data Download Completed</h5>
+                    </p>
+                </group>
+                <footer>
+                    <button string="Confirm" special="cancel" class="oe_highlight"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="sync_employee_wizard_view">
+        <field name="name">sync.employee.wizard.view</field>
+        <field name="model">employee.sync.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Success">
+                <group>
+                    <p class="oe_black">
+                        <h5>Employee Data Sync Completed</h5>
+                    </p>
+                </group>
+                <footer>
+                    <button string="Confirm" special="cancel" class="oe_highlight"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

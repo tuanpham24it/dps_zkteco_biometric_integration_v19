@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+
+    <record id="dps_hr_attendance_form_view_inherit" model="ir.ui.view">
+        <field name="name">dps.hr.attendance.form.view.inherit</field>
+        <field name="model">hr.attendance</field>
+        <field name="inherit_id" ref="hr_attendance.hr_attendance_view_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//form/sheet/group/group[@colspan='2'][1]" position="after">
+
+                <field name="is_multiple_shift" invisible="1"/>
+
+                <separator string="Multiple Shift" invisible="is_multiple_shift == False"/>
+
+                <group colspan="4" invisible="is_multiple_shift == False">
+
+                    <group string="Multiple Punch Entries" colspan="4">
+                        <field name="multiple_checkin_ids">
+                            <list editable="bottom" create="0">
+                                <field name="count"/>
+                                <field name="employee_id"/>
+                                <field name="check_in"/>
+                                <field name="check_out"/>
+                                <field name="break_time" widget="float_time"/>
+                                <field name="worked_hours" widget="float_time"/>
+                                <field name="actual_worked_hours" widget="float_time"/>
+                            </list>
+                        </field>
+                    </group>
+
+                    <group col="2">
+                        <field name="worked_hours_ms" widget="float_time"/>
+                        <field name="actual_worked_hours_ms" widget="float_time"/>
+                        <field name="overtime_hours_ms" widget="float_time"/>
+                        <field name="break_time_ms" widget="float_time"/>
+                        <field name="shortfall_hours_ms" widget="float_time"/>
+                    </group>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+
+    <record id="zkteco_device_attendance_logs_list_view" model="ir.ui.view">
+        <field name="name">zkteco.device.zkteco.device.logss.list.view</field>
+        <field name="model">zkteco.device.logs</field>
+        <field name="arch" type="xml">
+            <list string="ZKTeco Device Attendance Logs" create="false">
+                <field name="employee_code"/>
+                <field name="employee_id"/>
+                <field name="user_punch_time"/>
+                <field name="weekday_name"/>
+                <field name="employee_department"/>
+                <field name="status"/>
+                <field name="device"/>
+                <field name="company_id"/>
+                <field name="employee_name" optional="hide"/>
+                <field name="zketco_duser_id"/>
+                <field name="punch_status_in_string" optional="hide"/>
+                <field name="status_number" optional="hide"/>
+                <field name="number" optional="hide"/>
+                <field name="timestamp" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- <record id="zkteco_device_attendance_logs_filter_views" model="ir.ui.view">
+        <field name="name">zkteco.device.zkteco.device.logss.filter.views</field>
+        <field name="model">zkteco.device.logs</field>
+        <field name="arch" type="xml">
+            <search string="Search Attendance Logs">
+                <field name="employee_id"/>
+                <field name="device"/>
+
+                <filter name="today" string="Today"
+                        domain="[('user_punch_time', '&gt;=', datetime.datetime.now().strftime('%Y-%m-%d 00:00:00')), ('user_punch_time', '&lt;=', datetime.datetime.now().strftime('%Y-%m-%d 23:23:59'))]"/>
+
+                <filter name="current_month" string="Current Month"
+                        domain="[('user_punch_time', '&gt;=', datetime.datetime.now().strftime('%Y-%m-01'))]"/>
+
+                <separator/>
+
+                <filter name="my_attendances" string="My Attendances"
+                        domain="[('employee_id.user_id.id', '=', uid)]"/>
+
+                <group expand="0" string="Group By">
+                    <filter name="employee" string="Employee" context="{'group_by': 'employee_id'}"/>
+                    <separator/>
+                    <filter name="groupby_month" string="Month" context="{'group_by': 'user_punch_time'}"/>
+                    <filter name="device" string="Biometric Device" context="{'group_by': 'device'}"/>
+                </group>
+            </search>
+        </field>
+    </record> -->
+    
+
+    <record id="zkteco_device_attendance_logs_filter_views" model="ir.ui.view">
+        <field name="name">zkteco.device.logs.search</field>
+        <field name="model">zkteco.device.logs</field>
+        <field name="arch" type="xml">
+            <search string="Search Attendance Logs">
+
+                <field name="employee_id"/>
+                <field name="device"/>
+
+                <!-- Today -->
+                <filter name="today"
+                        string="Today"
+                        domain="[('user_punch_time', '>=', context_today())]"/>
+
+                <!-- My Attendances -->
+                <filter name="my_attendances"
+                        string="My Attendances"
+                        domain="[('employee_id.user_id', '=', uid)]"
+                        groups="hr_attendance.group_hr_attendance_user"/>
+
+                <separator/>
+
+                <!-- Group By -->
+                <filter name="group_employee"
+                        string="Group by Employee"
+                        context="{'group_by': 'employee_id'}"/>
+
+                <filter name="group_device"
+                        string="Group by Device"
+                        context="{'group_by': 'device'}"/>
+
+                <filter name="group_date"
+                        string="Group by Date"
+                        context="{'group_by': 'user_punch_time'}"/>
+
+            </search>
+        </field>
+    </record>
+
+
+    <record id="action_zkteco_device_attendance_logs" model="ir.actions.act_window">
+        <field name="name">ZKTeco Device Attendance Log</field>
+        <field name="res_model">zkteco.device.logs</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{"search_default_today": 1}</field>
+        <field name="search_view_id" ref="zkteco_device_attendance_logs_filter_views"/>
+    </record>
+
+</odoo>

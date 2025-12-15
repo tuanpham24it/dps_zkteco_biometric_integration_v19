@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="zkteco_device_attendance_state_list_view" model="ir.ui.view">
+        <field name="name">zkteco.device.zkteco.device.states.tree</field>
+        <field name="model">zkteco.device.states</field>
+        <field name="arch" type="xml">
+            <list string="ZKTeco Attendance States" create="0">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="device_id"/>
+                <field name="activity_type"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="zkteco_device_attendance_state_form_view" model="ir.ui.view">
+        <field name="name">zkteco.device.zkteco.device.states.form</field>
+        <field name="model">zkteco.device.states</field>
+        <field name="arch" type="xml">
+            <form string="Attendance State" create="0">
+                <group>
+                    <field name="name"/>
+                    <field name="code"/>
+                    <field name="device_id"/>
+                    <field name="description"/>
+                    <field name="activity_type"/>
+                </group>
+            </form>
+        </field>
+    </record>
+
+    <record id="zkteco_device_attendance_state_search_view" model="ir.ui.view">
+        <field name="name">zkteco.device.zkteco.device.states.search</field>
+        <field name="model">zkteco.device.states</field>
+        <field name="arch" type="xml">
+            <search string="ZKTeco Attendance States">
+                <field name="name"/>
+                <field name="code"/>
+                <filter string="By Device" name="device" domain="[]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_zkteco_device_attendance_states" model="ir.actions.act_window">
+        <field name="name">ZKTeco Attendance States</field>
+        <field name="res_model">zkteco.device.states</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="oe_view_nocontent_create">
+                Configure ZKTeco Attendance States for mapping device logs with Odoo.
+            </p>
+        </field>
+    </record>
+
+    <record id="action_synchronize_all_employee_to_zkteco_device" model="ir.actions.server">
+        <field name="name">Sync All Employees to All Devices</field>
+        <field name="model_id" ref="model_zkteco_device_setting"/>
+        <field name="state">code</field>
+        <field name="code">model.action_sync_employees_all_devices()</field>
+    </record>
+
+</odoo>

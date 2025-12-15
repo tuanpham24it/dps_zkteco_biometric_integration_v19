@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ================= Root Menu ================= -->
+    <!-- Main menu for ZKTeco Biometric Integration -->
+    <menuitem id="menu_zkteco_root"
+              name="EAttendances"
+              sequence="10"
+              web_icon="dps_zkteco_biometric_integration,static/description/icon.png"/>
+
+    <!-- ================= Logs Menu (First Priority) ================= -->
+    <!-- Parent menu for viewing all ZKTeco device logs -->
+    <!-- <menuitem
+        id="dashboard_dashoard_custom_menu"
+        name="Dashboard"
+        parent="hr_attendance.menu_hr_attendance_root"
+        action="action_zkteco_dashboard_dashboard_custom"
+        sequence="3"
+        groups="hr_attendance.group_hr_attendance_manager"/>         -->
+
+    <menuitem id="menu_zkteco_attendance_logs_main"
+              name="Device Logs"
+              parent="menu_zkteco_root"
+              sequence="20"
+              groups="hr_attendance.group_hr_attendance_manager"/>
+
+    <!-- Child menu for Biometric Attendance Logs -->
+    <menuitem id="menu_zkteco_attendance_logs"
+              name="Attendance Logs"
+              action="action_zkteco_device_attendance_logs"
+              parent="menu_zkteco_attendance_logs_main"
+              sequence="1"
+              groups="hr_attendance.group_hr_attendance_manager"/>
+
+    <!-- ================= Device Settings ================= -->
+    <!-- Parent menu for all ZKTeco device configurations -->
+    <menuitem id="menu_zkteco_device_settings"
+              name="Device Settings"
+              parent="menu_zkteco_root"
+              sequence="40"
+              groups="hr_attendance.group_hr_attendance_manager"/>
+
+    <!-- Child menu for Device Configuration -->
+    <menuitem id="menu_zkteco_device_configuration"
+              name="Device Configuration"
+              action="action_zkteco_device_settings_view"
+              parent="menu_zkteco_device_settings"
+              sequence="1"
+              groups="hr_attendance.group_hr_attendance_manager"/>
+
+    <!-- Child menu for Attendance State Configuration -->
+    <menuitem id="menu_zkteco_attendance_states"
+              name="Attendance States"
+              action="action_zkteco_device_attendance_states"
+              parent="menu_zkteco_device_settings"
+              sequence="2"
+              groups="hr_attendance.group_hr_attendance_manager"/>
+    <!-- Child menu for Attendance State Configuration -->
+    <menuitem id="menu_zkteco_attendance_device_users"
+              name="Device Users"
+              action="action_zkteco_device_users"
+              parent="menu_zkteco_device_settings"
+              sequence="3"
+              groups="hr_attendance.group_hr_attendance_manager"/>
+
+    <!-- ================= Sync Menu ================= -->
+    <!-- Parent menu for synchronization actions -->
+    <menuitem id="menu_zkteco_sync"
+              name="Synchronization"
+              parent="menu_zkteco_root"
+              sequence="50"
+              groups="hr_attendance.group_hr_attendance_manager"/>
+
+    <!-- Child menu for Calculate Attendance from Logs -->
+    <menuitem id="menu_zkteco_device_calculation"
+              name="Calculate Attendance"
+              action="action_calculate_attendance_device_wizard"
+              parent="dps_zkteco_biometric_integration.menu_zkteco_sync"
+              sequence="2"
+              groups="hr_attendance.group_hr_attendance_manager"/>
+
+    <!-- Parent: Attendance Manager (custom) -->
+    <menuitem id="menu_zkteco_attendance_report"
+              name="Reports"
+              parent="menu_zkteco_root"
+              sequence="30"
+              groups="hr_attendance.group_hr_attendance_manager"/>
+
+    <!-- Child: Employee Attendance Report -->
+    <menuitem id="menu_zkteco_device_attendance_report"
+              name="Employee Attendance Report"
+              action="action_zkteco_device_report_dps"
+              parent="dps_zkteco_biometric_integration.menu_zkteco_attendance_report"
+              sequence="3"
+              groups="hr_attendance.group_hr_attendance_manager"/>
+
+
+    <menuitem id="menu_employee_attendance_reports"
+              name="Daily Reports"
+              action="action_employee_attendance_reports"
+              parent="dps_zkteco_biometric_integration.menu_zkteco_attendance_report"
+              sequence="10"/>
+
+
+</odoo>

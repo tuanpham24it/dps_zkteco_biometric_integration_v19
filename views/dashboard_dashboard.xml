@@ -1,0 +1,399 @@
+<odoo>
+	<record id="dashboard_dashboard_kanban_custom" model="ir.ui.view">
+	    <field name="name">dashboard.dashboard.kanban.inherit</field>
+	    <field name="model">dashboard.dashboard</field>
+	    <field name="arch" type="xml">
+	    	<kanban create="false" class="o_kanban_dashboard o_zkteco_kanban" full_width="1">
+	    		<field name="dashboard_data_filter"/>
+	    		<field name="total_attedance_logs"/>
+                <field name="my_total_attedance_logs"/>
+                <field name="total_attedance_state"/>
+                <field name="my_total_attedance_state_color"/>
+                <field name="total_device"/>
+                <field name="my_total_device_color"/>
+                <field name="my_total_employee_color"/>
+                <field name="total_employee"/>
+                <field name="total_absent"/>
+                <field name="my_total_absent_color"/>
+                <field name="total_present"/>
+                <field name="my_total_present_color"/>
+                <field name="total_late"/>
+                <field name="my_total_late_color"/>
+                <field name="total_early_leave"/>
+                <field name="my_total_early_leave_color"/>
+                <field name="present_employee_data"/>
+                <field name="absent_employee_data"/>
+                <field name="late_employee_data"/>
+                <field name="early_leave_employee_data"/>
+
+
+                <templates>
+                    <t t-name="zkteco_dashboard_block">
+                        <div t-attf-class="card main-card card-main" t-attf-style="border-color:#{main_record_color}">
+                            <div class="card-heading"
+                                 t-attf-style="border-color:#{main_record_color}; background-color: #{main_record_color};">
+                                <div class="row">
+                                    <div class="col-3 stat-icon">
+                                        <i t-attf-class="fa #{main_record_icon}" aria-label="Info" title="Info"></i>
+                                    </div>
+                                    <div class="col-9 text-right">
+                                        <div class="value">
+                                            <span t-esc="main_field_name"/>
+                                        </div>
+                                        <div class="title">
+                                            <t t-esc="main_record_lable"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <a type="object" name="main_open_dashboard_action"
+                               t-attf-context="{'main_action': '#{main_record_action}' }"
+                               t-attf-style="color: #{main_record_color};">
+                                <div class="card-footer main-footer">
+                                    <span class="float-start">View Details</span>
+                                    <span class="float-end">
+                                        <i class="fa fa-arrow-circle-right" aria-label="Info" title="Info"></i>
+                                    </span>
+                                    <div class="clearfix"/>
+                                </div>
+                            </a>
+                        </div>
+                    </t>
+                    <t t-name="zkteco_dashboard_block_second">
+                        <div t-attf-class="card main-card card-main" t-attf-style="border-color:#{main_record_color}">
+                            <div class="card-heading" t-attf-style="border-color:#{main_record_color}; background-color: #{main_record_color};">
+                                <div class="row">
+                                    <div class="col-3 stat-icon">
+                                        <i t-attf-class="fa #{main_record_icon}" aria-label="Info" title="Info"></i>
+                                    </div>
+                                    <div class="col-9 text-right">
+                                        <div class="row">
+                                            <div class="col-6 text-center my-auto">
+                                                <a type="object" name="main_open_dashboard_action" t-attf-context="{'main_action': '#{main_record_action}' }">
+                                                
+                                                    <div class="value big-main-number">
+                                                        <span t-esc="main_field_name"/>
+                                                    </div>
+                                                    <div class="title small">
+                                                        <t t-esc="main_record_lable"/>
+                                                    </div>
+                                                </a>
+                                            </div>
+
+                                            <div class="col-6 text-center my-auto">
+                                                <a type="object" name="main_open_dashboard_action" t-attf-context="{'main_action': '#{main_record2_action}' }">
+                                                
+                                                    <div class="value big-main-number">
+                                                        <span t-esc="main_field2_name"/>
+                                                    </div>
+                                                    <div class="title small">
+                                                        <t t-esc="main_record2_lable"/>
+                                                    </div>
+                                                </a>
+                                            </div>                                            
+                                        </div>
+                                        <hr class="main-hr"/>
+                                        <div class="text-center title"><t t-esc="main_lable"/></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                    <t t-name="kanban-box">
+                        <div id="zkteco_dashboard" class="">
+                            <!-- <div class="col-12"> -->
+                            <div class="row">
+                               <span t-esc="dashboard_data_filter"/>
+                                <div class="btn-group col-4 mt8 mb8" role="group" aria-label="Filters">
+                                    <button t-attf-class="btn #{record.dashboard_data_filter.raw_value=='today' ? 'btn-primary' : 'btn-secondary'}" type="object" name="today_data">Today</button>
+                                    <button t-attf-class="btn #{record.dashboard_data_filter.raw_value=='week' ? 'btn-primary' : 'btn-secondary'}" type="object" name="week_data">This Week</button>
+                                    <button t-attf-class="btn #{record.dashboard_data_filter.raw_value=='month' ? 'btn-primary' : 'btn-secondary'}" type="object" name="month_data">This Month</button>
+                                    <button t-attf-class="btn #{record.dashboard_data_filter.raw_value=='all' ? 'btn-primary' : 'btn-secondary'}" type="object" name="all_data">Till Now</button>
+                                </div>
+                            </div>
+                            <div class="row">
+                            	<div class="col-3 main_block">
+                                    <t t-call="zkteco_dashboard_block">
+                                        <t t-set="main_record_color" t-value="record.my_total_employee_color.raw_value"/>
+                                        <t t-set="main_record_icon" t-value="'fa-users'"/>
+                                        <t t-set="main_field_name" t-value="record.total_employee.raw_value"/>
+                                        <t t-set="main_record_lable">Total Employee</t>
+                                        <t t-set="main_record_action" t-value="'open_employee'"/>
+                                    </t>
+                                </div>
+
+                            	<div class="col-3 main_block">
+                                    <t t-call="zkteco_dashboard_block">
+                                        <t t-set="main_record_color" t-value="record.my_total_absent_color.raw_value"/>
+                                        <t t-set="main_record_icon" t-value="'fa-times-circle'"/>
+                                        <t t-set="main_field_name" t-value="record.total_absent.raw_value"/>
+                                        <t t-set="main_record_lable">Total Absent Employee</t>
+                                        <t t-set="main_record_action" t-value="'open_absent'"/>
+                                    </t>
+                                </div>
+
+                                <div class="col-3 main_block">
+                                    <t t-call="zkteco_dashboard_block">
+                                        <t t-set="main_record_color" t-value="record.my_total_present_color.raw_value"/>
+                                        <t t-set="main_record_icon" t-value="'fa-check-circle'"/>
+                                        <t t-set="main_field_name" t-value="record.total_present.raw_value"/>
+                                        <t t-set="main_record_lable">Total Present Employee</t>
+                                        <t t-set="main_record_action" t-value="'open_present'"/>
+                                    </t>
+                                </div>
+
+                                <div class="col-3 main_block">
+                                    <t t-call="zkteco_dashboard_block">
+                                        <t t-set="main_record_color" t-value="record.my_total_late_color.raw_value"/>
+                                        <t t-set="main_record_icon" t-value="'fa-clock-o'"/>
+                                        <t t-set="main_field_name" t-value="record.total_late.raw_value"/>
+                                        <t t-set="main_record_lable">Late Arrival</t>
+                                        <t t-set="main_record_action" t-value="'open_late'"/>
+                                    </t>
+                                </div>
+
+                                <div class="col-3 main_block">
+                                    <t t-call="zkteco_dashboard_block">
+                                        <t t-set="main_record_color" t-value="record.my_total_early_leave_color.raw_value"/>
+                                        <t t-set="main_record_icon" t-value="'fa-sign-out'"/>
+                                        <t t-set="main_field_name" t-value="record.total_early_leave.raw_value"/>
+                                        <t t-set="main_record_lable">Early Leavings</t>
+                                        <t t-set="main_record_action" t-value="'open_early_leave'"/>
+                                    </t>
+                                </div>
+
+                                <div class="col-3 main_block">
+                                    <t t-call="zkteco_dashboard_block">
+                                        <t t-set="main_record_color" t-value="record.my_total_attedance_logs.raw_value"/>
+                                        <t t-set="main_record_icon" t-value="'fa-list'"/>
+                                        <t t-set="main_field_name" t-value="record.total_attedance_logs.raw_value"/>
+                                        <t t-set="main_record_lable">Total Attendance Logs</t>
+                                        <t t-set="main_record_action" t-value="'open_attendance_log'"/>
+                                    </t>
+                                </div>
+
+                                <div class="col-3 main_block">
+                                    <t t-call="zkteco_dashboard_block">
+                                        <t t-set="main_record_color" t-value="record.my_total_attedance_state_color.raw_value"/>
+                                        <t t-set="main_record_icon" t-value="'fa fa-list'"/>
+                                        <t t-set="main_field_name" t-value="record.total_attedance_state.raw_value"/>
+                                        <t t-set="main_record_lable">Total Attendance State</t>
+                                        <t t-set="main_record_action" t-value="'open_attendance_state'"/>
+                                    </t>
+                                </div>
+
+                                <div class="col-3 main_block">
+                                    <t t-call="zkteco_dashboard_block">
+                                        <t t-set="main_record_color" t-value="record.my_total_device_color.raw_value"/>
+                                        <t t-set="main_record_icon" t-value="'fa-desktop'"/>
+                                        <t t-set="main_field_name" t-value="record.total_device.raw_value"/>
+                                        <t t-set="main_record_lable">Device</t>
+                                        <t t-set="main_record_action" t-value="'open_device'"/>
+                                    </t>
+                                </div>
+
+                            </div>
+                             <br></br>
+
+                            <div class="row" id="present_employe_list" >
+                                <div class="col-6 mb32">
+                                    <t t-value="JSON.parse(record.present_employee_data.raw_value)" t-set="present_employee_data"/>
+                                    <div class="card">
+                                        <h5 class="card-header">
+                                            <a style="color: #883F73;" type="object" name="open_requests">Present Employee</a> <a href="#" title="This will show max 20 records only" class="o_doc_link"/>
+                                        </h5>
+                                        <div class="card-body p-0" >
+                                            <div class="table-responsive table-striped">
+                                                <table class="table">
+                                                    <thead style="background-color:#883F73; color:white; font-weight: bold;">
+                                                        <tr class="border-0">
+                                                             <th class="border-0">#</th>
+                                                            <th class="border-0">Employee</th>
+                                                            <th class="border-0">Department</th>
+                                                            <th class="border-0">Job</th>
+                                                            <th class="border-0">Check-In</th>
+                                                        </tr>
+                                                    </thead>
+
+                                                    <tbody>
+                                                        <tr t-foreach="present_employee_data" t-as="line">
+                                                            <td><span t-esc="line_index + 1"/>.</td>
+                                                            <td>
+                                                                <a t-attf-href="/web#id={{ line.id }}&amp;model=hr.employee&amp;view_type=form">
+                                                                    <span t-esc="line.name"/>
+                                                                </a>
+                                                            </td>
+                                                             <td><span t-esc="line.department"/></td>
+                                                            <td><span t-esc="line.job"/></td>
+                                                            <td><span t-esc="line.check_in"/></td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            <!-- </div>
+
+                            <div class="row" id="absent_employe_list" > -->
+                                <div class="col-6 mb32">
+                                    <t t-value="JSON.parse(record.absent_employee_data.raw_value)" t-set="absent_employee_data"/>
+                                    <div class="card">
+                                        <h5 class="card-header">
+                                            <a style="color: #883F73;" type="object" name="open_requests">Absent Employee</a> <a href="#" title="This will show max 20 records only" class="o_doc_link"/>
+                                        </h5>
+                                        <div class="card-body p-0" >
+                                            <div class="table-responsive table-striped">
+                                                <table class="table">
+                                                    <thead style="background-color:#883F73; color:white; font-weight: bold;">
+                                                        <tr class="border-0">
+                                                             <th class="border-0">#</th>
+                                                            <th class="border-0">Employee</th>
+                                                            <th class="border-0">Department</th>
+                                                            <th class="border-0">Job</th>
+                                                            <th class="border-0">Check-In</th>
+                                                        </tr>
+                                                    </thead>
+
+                                                    <tbody>
+                                                        <tr t-foreach="absent_employee_data" t-as="line">
+                                                            <td><span t-esc="line_index + 1"/>.</td>
+                                                            <td>
+                                                                <a t-attf-href="/web#id={{ line.id }}&amp;model=hr.employee&amp;view_type=form">
+                                                                    <span t-esc="line.name"/>
+                                                                </a>
+                                                            </td>
+                                                             <td><span t-esc="line.department"/></td>
+                                                            <td><span t-esc="line.job"/></td>
+                                                            <td><span t-esc="line.check_in"/></td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                          
+                            <div class="row" id="late_employee_list">
+                                <div class="col-6 mb32">
+                                    <t t-set="late_employee_data" 
+                                       t-value="record.late_employee_data.raw_value and JSON.parse(record.late_employee_data.raw_value) or []"/>
+                                    <div class="card">
+                                        <h5 class="card-header">
+                                            <a style="color: #883F73;" type="object" name="open_late">Late Employees</a>
+                                            <a href="#" title="This will show max 20 records only" class="o_doc_link"/>
+                                        </h5>
+                                        <div class="card-body p-0">
+                                            <div class="table-responsive table-striped">
+                                                <table class="table">
+                                                    <thead style="background-color:#883F73; color:white; font-weight: bold;">
+                                                        <tr class="border-0">
+                                                            <th class="border-0">#</th>
+                                                            <th class="border-0">Employee</th>
+                                                            <th class="border-0">Department</th>
+                                                            <th class="border-0">Job</th>
+                                                            <th class="border-0">Check-In</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <t t-if="late_employee_data.length > 0">
+                                                            <tr t-foreach="late_employee_data" t-as="line">
+                                                                <td><span t-esc="line_index + 1"/>.</td>
+                                                                <td>
+                                                                    <a t-attf-href="/web#id={{ line.id }}&amp;model=hr.employee&amp;view_type=form">
+                                                                        <span t-esc="line.name"/>
+                                                                    </a>
+                                                                </td>
+                                                                <td><span t-esc="line.department"/></td>
+                                                                <td><span t-esc="line.job"/></td>
+                                                                <td><span t-esc="line.last_check_in"/></td>
+                                                            </tr>
+                                                        </t>
+                                                        <t t-else="">
+                                                            <tr>
+                                                                <td colspan="5" style="text-align:center; color:#883F73; font-weight:bold;">
+                                                                    No late employees
+                                                                </td>
+                                                            </tr>
+                                                        </t>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                           <!--  </div>
+                            <div class="row" id="early_leave_employee_list"> -->
+                                <div class="col-6 mb32">
+                                    <t t-set="early_leave_employee_data" 
+                                       t-value="record.early_leave_employee_data.raw_value and JSON.parse(record.early_leave_employee_data.raw_value) or []"/>
+                                    <div class="card">
+                                        <h5 class="card-header">
+                                            <a style="color: #883F73;" type="object" name="open_early_leave">Early Leave Employees</a>
+                                            <a href="#" title="This will show max 20 records only" class="o_doc_link"/>
+                                        </h5>
+                                        <div class="card-body p-0">
+                                            <div class="table-responsive table-striped">
+                                                <table class="table">
+                                                    <thead style="background-color:#883F73; color:white; font-weight: bold;">
+                                                        <tr class="border-0">
+                                                            <th class="border-0">#</th>
+                                                            <th class="border-0">Employee</th>
+                                                            <th class="border-0">Department</th>
+                                                            <th class="border-0">Job</th>
+                                                            <th class="border-0">Check-Out</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <t t-if="early_leave_employee_data.length > 0">
+                                                            <tr t-foreach="early_leave_employee_data" t-as="line">
+                                                                <td><span t-esc="line_index + 1"/>.</td>
+                                                                <td>
+                                                                    <a t-attf-href="/web#id={{ line.id }}&amp;model=hr.employee&amp;view_type=form">
+                                                                        <span t-esc="line.name"/>
+                                                                    </a>
+                                                                </td>
+                                                                <td><span t-esc="line.department"/></td>
+                                                                <td><span t-esc="line.job"/></td>
+                                                                <td><span t-esc="line.last_check_out"/></td>
+                                                            </tr>
+                                                        </t>
+                                                        <t t-else="">
+                                                            <tr>
+                                                                <td colspan="5" style="text-align:center; color:#883F73; font-weight:bold;">
+                                                                    No early leave employees
+                                                                </td>
+                                                            </tr>
+                                                        </t>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                        <!-- </div> -->
+                    </div>
+                </t>
+            </templates>
+        </kanban>
+    </field>
+</record>
+ <record id="action_zkteco_dashboard_dashboard_custom" model="ir.actions.act_window">
+        <field name="name">Zkteco Dashboard</field>
+        <field name="res_model">dashboard.dashboard</field>
+        <field name="view_mode">kanban</field>
+        <field name="view_id" ref="dashboard_dashboard_kanban_custom"/>
+        <field name="context">{}</field>
+    </record>
+
+    <!-- <menuitem
+        id="dashboard_dashoard_custom"
+        name="Zkteco Dashboard"
+        parent="menu_zkteco_root"
+        action="action_zkteco_dashboard_dashboard_custom"
+        sequence="100"/> -->
+</odoo>

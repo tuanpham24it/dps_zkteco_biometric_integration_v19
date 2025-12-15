@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Attendance tree -->
+    <record model="ir.ui.view" id="hr_attendance_list_view_inherit">
+        <field name="name">hr.attendance.list.view.inherit</field>
+        <field name="model">hr.attendance</field>
+        <field name="inherit_id" ref="hr_attendance.view_attendance_tree"/>
+        <field name="arch" type="xml">
+            <field name="check_in" position="before">
+                <field name="punch_date" column_invisible="1"/>
+            </field>
+            <field name="check_out" position="after">
+                <field name="check_in_check_out_difference" widget="float_time"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- Attendance form -->
+    <record model="ir.ui.view" id="hr_attendance_form_view_inherit_zk">
+        <field name="name">hr.attendance.form.view.inherit.zk</field>
+        <field name="model">hr.attendance</field>
+        <field name="inherit_id" ref="hr_attendance.hr_attendance_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='overtime_hours']" position="after">
+                <field name="break_time" widget="float_time" readonly="1"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Employee -->
+    <record model="ir.ui.view" id="employees_form_view_inherit_zk">
+        <field name="name">employees.form.view.inherit.zk</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='hr_settings']" position="after">
+                <page string="ZKTeco Bio Devices">
+                    <field name="biometric_device_ids">
+                        <list editable="bottom" create="0">
+                            <field name="zkteco_device_attend_id"/>
+                            <field name="device_id"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Resource calendar -->
+    <record model="ir.ui.view" id="zk_rc_form_view_inherit">
+        <field name="name">zk.rc.form.view.inherit</field>
+        <field name="model">resource.calendar</field>
+        <field name="inherit_id" ref="resource.resource_calendar_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='tz']" position="after">
+                <field name="working_hours" widget="float_time"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Settings: Minimal attendance -->
+    <record model="ir.ui.view" id="zk_rc_form_view_inherit_minimal_attendance">
+        <field name="name">zk.rc.form.view.inherit.minimal.attendance</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="hr_attendance.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//block[@name='overtime_settings']" position="after">
+                <h2>ZKTeco Attendance Biometric Device</h2>
+                <div class="row mt16 o_settings_container">
+                    <div class="col-12 col-lg-6 o_setting_box">
+                        <div class="o_setting_left_pane">
+                            <field name="minimal_attendance"/>
+                        </div>
+                        <div class="o_setting_right_pane">
+                            <label for="minimal_attendance"/>
+                            <div class="text-muted">
+                                Process attendance data on a per-day basis.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Settings: Multiple shift -->
+    <record model="ir.ui.view" id="zk_rc_form_view_inherit_shifts">
+        <field name="name">zk.rc.form.view.inherit.shifts</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="hr_attendance.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//block[@name='overtime_settings']" position="after">
+                <h2>Multiple Shift</h2>
+                <div class="row mt16 o_settings_container">
+                    <div class="col-12 col-lg-6 o_setting_box">
+                        <div class="o_setting_left_pane">
+                            <field name="multiple_shift"/>
+                        </div>
+                        <div class="o_setting_right_pane">
+                            <label for="multiple_shift"/>
+                            <div class="text-muted">
+                                Handle multiple shift records and punches daily.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

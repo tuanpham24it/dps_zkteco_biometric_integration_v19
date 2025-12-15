@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="ir_rule_zkteco_device" model="ir.rule">
+            <field name="name">ZKTeco Device Multi-Company</field>
+            <field name="model_id" ref="model_zkteco_device_setting"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+
+        <record id="ir_rule_zkteco_device_logs" model="ir.rule">
+            <field name="name">ZKTeco Device Logs Multi-Company</field>
+            <field name="model_id" ref="model_zkteco_device_logs"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+
+    </data>
+</odoo>

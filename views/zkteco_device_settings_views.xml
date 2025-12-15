@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="zkteco_device_settings_form_view" model="ir.ui.view">
+        <field name="name">zkteco.device.settings.form.view</field>
+        <field name="model">zkteco.device.setting</field>
+        <field name="arch" type="xml">
+            <form string="ZKTeco Attendance Device">
+                <header>
+                    <field name="state" widget="statusbar"
+                           invisible="not is_adms"
+                           statusbar_visible="not_connected,connected"/>
+
+                    <button name="action_check_device_connection" type="object"
+                            class="oe_highlight"
+                            string="Check Connection"
+                            invisible="not is_adms"
+                            help="Upload settings from software to device"/>
+                </header>
+
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_validate_zkteco_connection" class="oe_stat_button"
+                                invisible="is_adms"
+                                icon="fa-plug" type="object" string="Test Connection"/>
+
+
+                    </div>
+
+                    <div class="oe_title" name="title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1>
+                            <field name="name" placeholder="Device Reference"/>
+                        </h1>
+                    </div>
+
+                    <group colspan="4" cols="4">
+                        <group>
+                            <field name="zkteco_device_ip_address" required="not is_adms"
+                                   invisible="is_adms"/>
+                            <field name="port" required="not is_adms"
+                                   invisible="is_adms"/>
+                            <field name="serial_number" required="is_adms"
+                                   invisible="not is_adms"/>
+                            <field name="is_adms" widget="boolean_toggle"/>
+                            <field name="company_id" readonly="state == 'connected'"/>
+                        </group>
+                        <group>
+                            <field name="password_configured"/>
+                            <field name="zkteco_device_pass" password="True"
+                                   invisible="password_configured == False"
+                                   required="password_configured == True"/>
+                            <field name="time_zone"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page name="adms_settings" string="Device Adms Config"
+                              invisible="not is_adms">
+                            <group>
+                                <field name="delay"/>
+                                <field name="error_delay"/>
+                                <field name="zkteco_device_real_time"/>
+                                <field name="device_t_interval"/>
+                            </group>
+                        </page>
+                        <page name="executions" string="Device Operations">
+                            <button name="action_synchronize_employees" type="object"
+                                    string="Synchronize Employees" class="oe_stat_button btn-primary"
+                                    icon="fa-users" invisible="is_adms"/>
+
+                            <button name="action_pull_attendance_logs" type="object"
+                                    string="Download Attendance Logs" class="oe_stat_button btn-success"
+                                    icon="fa-download" invisible="is_adms"/>
+
+                            <button name="action_zkteco_device_user_data_download" type="object"
+                                    string="Download Device Users" class="oe_stat_button btn-info"
+                                    icon="fa-user-circle" invisible="not is_adms"/>
+
+                            <button name="action_export_device_employee" type="object"
+                                    string="Export Employees to Device" class="oe_stat_button btn-warning"
+                                    icon="fa-share-square" invisible="not is_adms"/>
+
+                            <field name="device_attendance_logs_no" invisible="1"/>
+                            <button name="action_view_zkteco_attendance_logs" type="object"
+                                    string="Attendance Logs" class="oe_stat_button btn-light"
+                                    icon="fa-list" invisible="not is_adms">
+                                <div class="o_form_field o_stat_info">
+                                    <span class="o_stat_text">Logs Count</span>
+                                    <span class="o_stat_value">
+                                        <field name="device_attendance_logs_no"/>
+                                    </span>
+                                </div>
+                            </button>
+
+                            <field name="device_command_no_count" invisible="1"/>
+                            <button name="action_open_zkteco_device_commands" type="object"
+                                    string="Device Commands" class="oe_stat_button btn-secondary"
+                                    icon="fa-terminal" invisible="not is_adms">
+                                <div class="o_form_field o_stat_info">
+                                    <span class="o_stat_text">Commands Count</span>
+                                    <span class="o_stat_value">
+                                        <field name="device_command_no_count"/>
+                                    </span>
+                                </div>
+                            </button>
+
+                            <button name="action_device_fingerprint_open" type="object"
+                                    string="Manage Fingerprints" class="oe_stat_button btn-dark"
+                                    icon="fa-fingerprint" invisible="not is_adms"/>
+                        </page>
+
+                        <page name="users" string="Device Users"
+                              invisible="not is_adms">
+                            <field name="zkteco_device_user_ids">
+                                <list string="Users">
+                                    <field name="employee_badge_barcode_id"/>
+                                    <field name="zkteco_device_username"/>
+                                    <field name="zkteco_device_attend_id"/>
+                                    <field name="employee_id"/>
+                                </list>
+                            </field>
+                        </page>
+
+                        <page name="attendance_status_code" string="ZKTeco Device Status Code"
+                              invisible="not is_adms">
+                            <field name="zkteco_attendance_device_status_ids">
+                                <list string="Status Codes">
+                                    <field name="name"/>
+                                    <field name="code"/>
+                                    <field name="activity_type"/>
+                                </list>
+                            </field>
+                        </page>
+
+                        <page name="operation_stamp_logs" string="ZKTeco Device Operation Stamp Log"
+                              invisible="1">
+                            <field name="device_operation_stamplogs">
+                                <list string="Logs">
+                                    <field name="name"/>
+                                    <field name="log_date"/>
+                                    <field name="log_text"/>
+                                    <field name="opStamp"/>
+                                </list>
+                            </field>
+                        </page>
+
+                        <page name="stamp_log" string="ZKTeco Device Stamp Log"
+                              invisible="1">
+                            <field name="device_stamp_logs">
+                                <list string="Logs">
+                                    <field name="name"/>
+                                    <field name="log_date"/>
+                                    <field name="log_text"/>
+                                    <field name="device_id" column_invisible="True"/>
+                                    <field name="stamp"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+    <record model="ir.ui.view" id="zkteco_device_settings_list_view">
+        <field name="name">zkteco.device.settings.list.view</field>
+        <field name="model">zkteco.device.setting</field>
+        <field name="arch" type="xml">
+            <list string="ZKTeco Attendance Devices">
+                <field name="name"/>
+                <field name="time_zone"/>
+                <field name="zkteco_device_ip_address"/>
+                <field name="port"/>
+            </list>
+        </field>
+    </record>
+
+
+    <record model="ir.actions.act_window" id="action_zkteco_device_settings_view">
+        <field name="name">Biometric Device Configurations</field>
+        <field name="res_model">zkteco.device.setting</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="oe_view_nocontent_create">
+                Setup a new ZKTeco device to start syncing attendance data.
+            </p>
+        </field>
+    </record>
+
+
+    <record model="ir.actions.server" id="action_download_zkteco_device_users">
+        <field name="name">Download Users from ZKTeco Device</field>
+        <field name="type">ir.actions.server</field>
+        <field name="model_id" ref="model_zkteco_device_setting"/>
+        <field name="binding_model_id" ref="model_zkteco_device_setting"/>
+        <field name="binding_view_types">form</field>
+        <field name="state">code</field>
+        <field name="code">action = records.action_zkteco_device_user_data_download()</field>
+    </record>
+
+
+</odoo>

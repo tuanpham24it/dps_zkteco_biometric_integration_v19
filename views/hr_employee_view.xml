@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_employee_form_attendance" model="ir.ui.view">
+        <field name="name">employee.form.attendance</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+        <field name="arch" type="xml">
+
+            <!-- ✅ Odoo 19: đưa field vào header, KHÔNG dùng h2 -->
+            <xpath expr="//header" position="inside">
+                <field name="arabic_name" placeholder="Arabic Name"/>
+            </xpath>
+
+            <!-- Calendar -->
+            <xpath expr="//field[@name='resource_calendar_id']" position="after">
+                <field name="ramadan_resource_calendar_id"/>
+            </xpath>
+
+            <!-- Leave Tracking Tab -->
+            <xpath expr="//notebook" position="inside">
+                <page string="Leave Tracking">
+                    <field name="leave_line_ids">
+                        <list editable="bottom">
+                            <field name="date"/>
+                            <field name="leave_type"/>
+                            <field name="description"/>
+                            <field name="paid_medical_leave"
+                                   invisible="leave_type != 'medical'"/>
+                            <field name="att_start_date"
+                                   invisible="leave_type != 'medical'"
+                                   readonly="paid_medical_leave == False"/>
+                            <field name="att_end_date"
+                                   invisible="leave_type != 'medical'"
+                                   readonly="paid_medical_leave == False"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>

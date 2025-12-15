@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="zkteco_device_fingerprints_temp_list_view" model="ir.ui.view">
+        <field name="name">zkteco.device.fingerprints.temp.list.view</field>
+        <field name="model">zkteco.device.fingerprints</field>
+        <field name="arch" type="xml">
+            <list string="Fingerprint Templates">
+                <field name="employee_id"/>
+                <field name="device_id"/>
+                <field name="zketco_duser_id"/>
+            </list>
+        </field>
+    </record>
+
+
+    <record id="zkteco_device_fingerprints_temp_form_view" model="ir.ui.view">
+        <field name="name">zkteco.device.fingerprints.temp.form.view</field>
+        <field name="model">zkteco.device.fingerprints</field>
+        <field name="arch" type="xml">
+            <form string="Fingerprint Template">
+                <group>
+                    <field name="employee_id"/>
+                    <field name="device_id"/>
+                    <field name="zketco_duser_id"/>
+                    <field name="template_data" widget="binary"/>
+                </group>
+            </form>
+        </field>
+    </record>
+
+
+    <record id="action_zkteco_device_fingerprint_templates" model="ir.actions.act_window">
+        <field name="name">ZKTeco Device User Fingerprints</field>
+        <field name="res_model">zkteco.device.fingerprints</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="oe_view_nocontent_create">
+                Begin by enrolling a new fingerprint template for an employee.
+            </p>
+        </field>
+    </record>
+
+</odoo>
