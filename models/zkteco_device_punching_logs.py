@@ -11,15 +11,13 @@ from odoo.exceptions import UserError, ValidationError
 from convertdate import islamic
 
 
-class ZktecoDeviceLogs(models.Model):
-    """
-    Model to store attendance log records fetched from biometric devices.
+# ======================================================
+# ZKTeco Device Logs
+# ======================================================
 
-    Each log entry represents a punch action such as Check In, Check Out, or Punched.
-    The model ensures that logs once calculated cannot be deleted to maintain
-    accurate payroll and attendance history.
-    """
+class ZktecoDeviceLogs(models.Model):
     _name = 'zkteco.device.logs'
+    _description = 'ZKTeco Device Logs'
     _order = 'user_punch_time desc'
     _rec_name = 'user_punch_time'
 
@@ -29,365 +27,266 @@ class ZktecoDeviceLogs(models.Model):
             ('1', 'Check Out'),
             ('2', 'Punched')
         ],
-        string='Status',
-        help="Represents the type of punch recorded from the device."
+        string='Status'
     )
-    user_punch_time = fields.Datetime(
-        string='Punching Time',
-        help="The exact datetime when the punch action was recorded."
-    )
-    user_punch_calculated = fields.Boolean(
-        string='Punch Calculated',
-        default=False,
-        help="Indicates whether this record has already been processed in attendance calculations."
-    )
-    device = fields.Char(
-        string='Device',
-        help="The device from which this punch was captured."
-    )
+
+    user_punch_time = fields.Datetime(string='Punching Time')
+    user_punch_calculated = fields.Boolean(string='Punch Calculated', default=False)
+    device = fields.Char(string='Device')
+
     company_id = fields.Many2one(
         'res.company',
         string='Company',
-        readonly=True,
         default=lambda self: self.env.company,
-        help="The company associated with this attendance log."
-    )
-    zketco_duser_id = fields.Many2one(
-        'zkteco.attendance.machine',
-        string="Device User",
-        help="Reference to the device user linked to this punch record."
-    )
-    employee_id = fields.Many2one(
-        'hr.employee',
-        string='Employee',
-        related='zketco_duser_id.employee_id',
-        store=True,
-        help="Employee linked to this device user."
+        readonly=True
     )
 
-    # Customized by Tunn
-    employee_code = fields.Char(
-        string='Employee Code',
-        related='zketco_duser_id.employee_id.x_studio_m_nhn_vin',
-        help="Code of the employee fetched from the linked employee record."
+    zketco_duser_id = fields.Many2one(
+        'zkteco.attendance.machine',
+        string="Device User"
     )
+
+    employee_id = fields.Many2one(
+        'hr.employee',
+        related='zketco_duser_id.employee_id',
+        store=True
+    )
+
+    employee_code = fields.Char(string='Employee Code')
     employee_department = fields.Char(
-        string='Department',
         related='zketco_duser_id.employee_id.department_id.name',
-        help="Department of the employee fetched from the linked employee record."
+        string='Department'
     )
+    employee_name = fields.Char(
+        related='zketco_duser_id.employee_id.name',
+        string='Employee Name'
+    )
+
     weekday_name = fields.Char(
         string="Weekday",
         compute="_compute_weekday_name",
         store=True
     )
 
+    status_number = fields.Char(string="Status Number")
+    number = fields.Char(string="Number")
+    timestamp = fields.Integer(string="Timestamp")
+    punch_status_in_string = fields.Char(string="Status String")
 
-    employee_name = fields.Char(
-        string='Employee Name',
-        related='zketco_duser_id.employee_id.name',
-        help="Name of the employee fetched from the linked employee record."
-    )
-    status_number = fields.Char(
-        string="Status Number",
-        help="Raw status code received from the device."
-    )
-    number = fields.Char(
-        string="Number",
-        help="Identifier number from the device."
-    )
-    timestamp = fields.Integer(
-        string="Timestamp",
-        help="Numeric timestamp representation of the punch."
-    )
-    punch_status_in_string = fields.Char(
-        string="Status String",
-        help="Status text representation captured from the device."
-    )
+    # --------------------------------------------------
+    # CREATE (ODOO 19 SAFE)
+    # --------------------------------------------------
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        records = super().create(vals_list)
+
+        hr_attendance = self.env['hr.attendance']
+
+        for record in records:
+            employee = record.employee_id
+            punch_time = record.user_punch_time
+
+            if not employee or not punch_time:
+                continue
+
+            last_attendance = hr_attendance.search(
+                [('employee_id', '=', employee.id)],
+                order='check_in desc',
+                limit=1
+            )
+
+            if not last_attendance or last_attendance.check_out:
+                hr_attendance.create({
+                    'employee_id': employee.id,
+                    'check_in': punch_time,
+                })
+                record.status = '0'  # Check In
+            else:
+                if punch_time > last_attendance.check_in:
+                    last_attendance.write({'check_out': punch_time})
+                    record.status = '1'  # Check Out
+                else:
+                    record.status = '2'  # Old punch
+
+        return records
+
+    # --------------------------------------------------
+    # UNLINK PROTECTION
+    # --------------------------------------------------
 
     def unlink(self):
+        processed = self.filtered(lambda r: r.user_punch_calculated)
+        if processed:
+            raise UserError(_("You cannot delete processed attendance logs."))
+        return super().unlink()
 
-        already_processed_logs = self.filtered(lambda record: record.user_punch_calculated)
-        if already_processed_logs:
-            raise UserError(
-                _("You cannot delete attendance logs that are already processed. "
-                  "Please contact your administrator if you believe this is incorrect.")
-            )
-        return super(ZktecoDeviceLogs, self).unlink()
-    
-    # Customized by Tunn
-    @api.model
-    def create(self, vals):
-        """Khi có log mới, tự động tạo / cập nhật bản ghi hr.attendance."""
-        record = super().create(vals)
+    # --------------------------------------------------
+    # COMPUTE WEEKDAY
+    # --------------------------------------------------
 
-        employee = record.employee_id
-        punch_time = record.user_punch_time
-
-        if not employee or not punch_time:
-            return record
-
-        # Tìm bản ghi chấm công gần nhất của nhân viên
-        hr_attendance_model = self.env['hr.attendance']
-        last_attendance = hr_attendance_model.search([
-            ('employee_id', '=', employee.id)
-        ], order='check_in desc', limit=1)
-
-        if not last_attendance or last_attendance.check_out:
-            # Nếu chưa có hoặc đã check_out → tạo mới Check In
-            hr_attendance_model.create({
-                'employee_id': employee.id,
-                'check_in': punch_time
-            })
-            record.status = '0'  # Check In
-        else:
-            # Nếu có bản ghi check_in chưa có check_out
-            if punch_time > last_attendance.check_in:
-                last_attendance.write({'check_out': punch_time})
-                record.status = '1'  # Check Out
-            else:
-                # Nếu thời gian nhỏ hơn check_in gần nhất → bỏ qua (log cũ)
-                record.status = '2'
-
-        return record
-
-    # Customized by Tunn
     @api.depends('user_punch_time')
     def _compute_weekday_name(self):
         weekdays = [
-            "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm",
-            "Thứ Sáu", "Thứ Bảy", "Chủ Nhật"
+            "Thứ Hai", "Thứ Ba", "Thứ Tư",
+            "Thứ Năm", "Thứ Sáu", "Thứ Bảy", "Chủ Nhật"
         ]
         for rec in self:
-            if rec.user_punch_time:
-                rec.weekday_name = weekdays[rec.user_punch_time.weekday()]
-            else:
-                rec.weekday_name = False
+            rec.weekday_name = (
+                weekdays[rec.user_punch_time.weekday()]
+                if rec.user_punch_time else False
+            )
+
+
+# ======================================================
+# HR ATTENDANCE EXTENSION
+# ======================================================
 
 class HrAttendance(models.Model):
     _inherit = "hr.attendance"
 
     punch_date = fields.Date(string='Punch Date')
 
-    is_multiple_shift = fields.Boolean(string="Is Multiple Shift", copy=False, store=True,
-                                       compute='_compute_multiple_shifts')
+    is_multiple_shift = fields.Boolean(
+        string="Is Multiple Shift",
+        compute='_compute_multiple_shifts',
+        store=True
+    )
 
-    break_time_ms = fields.Float(string="Break Time", compute="_compute_ms_fields", store=True, copy=False)
-    worked_hours_ms = fields.Float(string="Worked Hours", compute="_compute_ms_fields", store=True, copy=False)
-    actual_worked_hours_ms = fields.Float(string="Actual Worked Hours", compute="_compute_ms_fields", store=True,
-                                          copy=False)
-    overtime_hours_ms = fields.Float(string="Overtime Hours", compute="_compute_ms_fields", store=True, copy=False)
-    shortfall_hours_ms = fields.Float(string="Shortfall Hours", compute="_compute_ms_fields", store=True, copy=False)
+    break_time_ms = fields.Float(compute="_compute_ms_fields", store=True)
+    worked_hours_ms = fields.Float(compute="_compute_ms_fields", store=True)
+    actual_worked_hours_ms = fields.Float(compute="_compute_ms_fields", store=True)
+    overtime_hours_ms = fields.Float(compute="_compute_ms_fields", store=True)
+    shortfall_hours_ms = fields.Float(compute="_compute_ms_fields", store=True)
 
     shortfall = fields.Float(string='Shortfall Hours', compute='_compute_shortfall', store=True)
+
     leave_type = fields.Selection([
         ('none', 'None'),
         ('holiday', 'Holiday'),
         ('medical', 'Medical Leave'),
         ('vacation', 'Vacation'),
-    ], string="Leave Type", default='none', required=True)
+    ], default='none', required=True)
 
-    def is_in_ramadan(self, punch_date):
-        """Convert the Gregorian date to the Islamic (Hijri) calendar.
-        Check if the month is Ramadan (9th month in the Islamic calendar)"""
-        hijri_year, hijri_month, hijri_day = islamic.from_gregorian(
-            punch_date.year, punch_date.month, punch_date.day)
-        return hijri_month == 9
+    # --------------------------------------------------
+    # MULTIPLE SHIFT CONFIG
+    # --------------------------------------------------
+
+    @api.depends()
+    def _compute_multiple_shifts(self):
+        param = self.env['ir.config_parameter'].sudo().get_param(
+            'dps_zkteco_biometric_integration.multiple_shift'
+        )
+        enabled = param in ['True', 'true', '1']
+        for rec in self:
+            rec.is_multiple_shift = enabled
+
+    def _get_multiple_shift_status(self):
+        param = self.env['ir.config_parameter'].sudo().get_param(
+            'dps_zkteco_biometric_integration.multiple_shift'
+        )
+        return param in ['True', 'true', '1']
+
+    # --------------------------------------------------
+    # CREATE (ODOO 19 SAFE)
+    # --------------------------------------------------
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if 'is_multiple_shift' not in vals:
+                vals['is_multiple_shift'] = self._get_multiple_shift_status()
+        return super().create(vals_list)
+
+    def write(self, values):
+        if 'is_multiple_shift' not in values:
+            values['is_multiple_shift'] = self._get_multiple_shift_status()
+        return super().write(values)
+
+    # --------------------------------------------------
+    # RAMADAN CALENDAR
+    # --------------------------------------------------
+
+    def is_in_ramadan(self, date):
+        hijri = islamic.from_gregorian(date.year, date.month, date.day)
+        return hijri[1] == 9
 
     def _get_employee_calendar(self):
         self.ensure_one()
-        if self.is_in_ramadan(self.check_in) or self.is_in_ramadan(
-                self.check_out) and self.employee_id:
-            return self.employee_id.ramadan_resource_calendar_id
+        if self.employee_id and self.check_in:
+            if self.is_in_ramadan(self.check_in.date()):
+                return self.employee_id.ramadan_resource_calendar_id
         return super()._get_employee_calendar()
+
+    # --------------------------------------------------
+    # COMPUTE SHORTFALL
+    # --------------------------------------------------
 
     @api.depends('worked_hours', 'employee_id')
     def _compute_shortfall(self):
-        for attendance in self:
-            attendance.shortfall = False
-            if attendance.worked_hours and attendance.employee_id:
-                calendar = attendance._get_employee_calendar()
-                working_hours = sum(calendar.attendance_ids.filtered(
-                    lambda x: x.dayofweek == str(attendance.check_in.weekday())
-                ).mapped('duration_hours'))
-                if working_hours > attendance.worked_hours:
-                    attendance.shortfall = 2 * (working_hours - attendance.worked_hours)
+        for rec in self:
+            rec.shortfall = 0.0
+            if rec.employee_id and rec.worked_hours:
+                calendar = rec._get_employee_calendar()
+                if calendar:
+                    working_hours = sum(calendar.attendance_ids.filtered(
+                        lambda a: a.dayofweek == str(rec.check_in.weekday())
+                    ).mapped('duration_hours'))
+                    if working_hours > rec.worked_hours:
+                        rec.shortfall = 2 * (working_hours - rec.worked_hours)
+
+    # --------------------------------------------------
+    # MULTI SHIFT AGGREGATE
+    # --------------------------------------------------
 
     @api.depends(
         'multiple_checkin_ids.break_time',
         'multiple_checkin_ids.worked_hours',
-        'multiple_checkin_ids.actual_worked_hours',
-        'employee_id.resource_calendar_id.working_hours'
+        'multiple_checkin_ids.actual_worked_hours'
     )
     def _compute_ms_fields(self):
-        for record in self:
-            total_break_time = sum(record.multiple_checkin_ids.mapped('break_time'))
-            total_worked_hours = sum(record.multiple_checkin_ids.mapped('worked_hours'))
-            total_actual_worked_hours = sum(record.multiple_checkin_ids.mapped('actual_worked_hours'))
-
-            record.break_time_ms = round(total_break_time, 2)
-            record.worked_hours_ms = round(total_worked_hours, 2)
-            record.actual_worked_hours_ms = round(total_actual_worked_hours, 2)
-
-            record.overtime_hours_ms = 0.0
-            record.shortfall_hours_ms = 0.0
-
-            working_hours = record.employee_id.resource_calendar_id.working_hours
-
-            if working_hours:
-                difference = round(record.actual_worked_hours_ms - working_hours, 2)
-                if difference > 0:
-                    record.overtime_hours_ms = difference
-                    record.shortfall_hours_ms = 0.0
-                elif difference < 0:
-                    record.shortfall_hours_ms = abs(difference)
-                    record.overtime_hours_ms = 0.0
-                else:
-                    record.overtime_hours_ms = 0.0
-                    record.shortfall_hours_ms = 0.0
-
-    @api.depends()
-    def _compute_multiple_shifts(self):
-
-        config_value = self.env['ir.config_parameter'].sudo().get_param(
-            'dps_zkteco_biometric_integration.multiple_shift'
-        )
-        is_multi_shift_enabled = config_value in ['True', 'true', '1']
         for rec in self:
-            rec.is_multiple_shift = True if is_multi_shift_enabled else False
+            rec.break_time_ms = sum(rec.multiple_checkin_ids.mapped('break_time'))
+            rec.worked_hours_ms = sum(rec.multiple_checkin_ids.mapped('worked_hours'))
+            rec.actual_worked_hours_ms = sum(rec.multiple_checkin_ids.mapped('actual_worked_hours'))
 
-    def _get_multiple_shift_status(self):
+            working_hours = rec.employee_id.resource_calendar_id.working_hours or 0
+            diff = rec.actual_worked_hours_ms - working_hours
 
-        config_value = self.env['ir.config_parameter'].sudo().get_param(
-            'dps_zkteco_biometric_integration.multiple_shift'
-        )
-        return config_value in ['True', 'true', '1']
+            rec.overtime_hours_ms = max(diff, 0)
+            rec.shortfall_hours_ms = abs(min(diff, 0))
 
-    @api.model
-    def create(self, values):
+    # --------------------------------------------------
+    # CHECK IN / OUT DIFF
+    # --------------------------------------------------
 
-        if 'is_multiple_shift' not in values:
-            values['is_multiple_shift'] = self._get_multiple_shift_status()
-        try:
-            return super(HrAttendance, self).create(values)
-        except Exception as e:
-            # Raise a professional error message if record creation fails
-            raise UserError(
-                f"Unable to create record. Reason: {str(e)}"
-            )
-
-    def write(self, values):
-
-        if 'is_multiple_shift' not in values:
-            values['is_multiple_shift'] = self._get_multiple_shift_status()
-        try:
-            return super(HrAttendance, self).write(values)
-        except Exception as e:
-            raise UserError(
-                f"Unable to update record(s). Reason: {str(e)}"
-            )
-
-    check_in_check_out_difference = fields.Float('Punching Difference', compute='check_in_check_out_diff')
+    check_in_check_out_difference = fields.Float(
+        string='Punching Difference',
+        compute='check_in_check_out_diff'
+    )
 
     def check_in_check_out_diff(self):
+        for rec in self:
+            if rec.check_in and rec.check_out:
+                delta = rec.check_out - rec.check_in
+                if delta.total_seconds() < 0:
+                    raise ValidationError(_("Check-out cannot be earlier than check-in."))
+                rec.check_in_check_out_difference = delta.total_seconds() / 3600
+            else:
+                rec.check_in_check_out_difference = 0.0
 
-        for record in self:
-            try:
-                if record.check_in and record.check_out:
-                    start_time = datetime.strptime(str(record.check_in), '%Y-%m-%d %H:%M:%S')
-                    end_time = datetime.strptime(str(record.check_out), '%Y-%m-%d %H:%M:%S')
-
-                    if end_time < start_time:
-                        raise ValidationError(
-                            "Invalid attendance entry: Check-out time cannot be earlier than check-in time."
-                        )
-
-                    duration_seconds = (end_time - start_time).seconds
-
-                    duration_hours = duration_seconds / 3600.0
-
-                    record.check_in_check_out_difference = duration_hours
-                else:
-                    record.check_in_check_out_difference = 0
-
-            except ValueError:
-                raise UserError(
-                    "Attendance record contains an invalid date format. "
-                    "Please ensure check-in and check-out are properly set."
-                )
+    # --------------------------------------------------
+    # UNLINK RESET LOG STATE
+    # --------------------------------------------------
 
     def unlink(self):
-
-        try:
-            for attendance_rec in self:
-                log_search_domain = [
-                    ('employee_id', '=', attendance_rec.employee_id.id),
-                    '|',
-                    ('user_punch_time', '=', attendance_rec.check_in),
-                    ('user_punch_time', '=', attendance_rec.check_out)
-                ]
-
-                related_logs = self.env['zkteco.device.logs'].search(log_search_domain)
-
-                for log_entry in related_logs:
-                    log_entry.user_punch_calculated = False
-
-            return super(HrAttendance, self).unlink()
-
-        except (UserError, ValidationError) as e:
-            raise UserError(
-                "An error occurred while deleting attendance records. "
-                f"Details: {str(e)}"
-            )
-        except Exception as e:
-            raise UserError(
-                "A system error occurred while processing the deletion of attendance records. "
-                "Please contact the system administrator. "
-                f"Error details: {str(e)}"
-            )
-
-
-class EmployeeLeaveLine(models.Model):
-    _name = 'employee.leave.line'
-    _description = 'Employee Leave Line'
-    _inherit = ['mail.thread', 'mail.activity.mixin']
-
-    employee_id = fields.Many2one('hr.employee', string="Employee", required=True, ondelete='cascade', tracking=True)
-    date = fields.Date(string="Date", required=True, tracking=True)
-    leave_type = fields.Selection([
-        ('none', 'None'),
-        ('holiday', 'Holiday'),
-        ('medical', 'Medical Leave'),
-        ('vacation', 'Vacation'),
-    ], string="Leave Type", default='none', required=True, tracking=True)
-    att_start_date = fields.Datetime(string="Start", store=True)
-    att_end_date = fields.Datetime(string="End", store=True)
-    paid_medical_leave = fields.Boolean(string='Paid')
-
-
-    description = fields.Char(string="Description")
-
-    def _log_change_on_employee(self, message):
+        logs = self.env['zkteco.device.logs']
         for rec in self:
-            if rec.employee_id:
-                rec.employee_id.message_post(
-                    body=message,
-                    subtype_xmlid="mail.mt_note",
-                )
-
-    @api.model
-    def create(self, vals):
-        rec = super().create(vals)
-        rec._log_change_on_employee(f"➕ Leave entry created: {rec.date} – {rec.leave_type.capitalize()}")
-        return rec
-
-    def write(self, vals):
-        res = super().write(vals)
-        for rec in self:
-            rec._log_change_on_employee(f"✏️ Leave entry updated: {rec.date} – {rec.leave_type.capitalize()}")
-        return res
-
-    def unlink(self):
-        for rec in self:
-            rec._log_change_on_employee(f"❌ Leave entry removed: {rec.date} – {rec.leave_type.capitalize()}")
+            related_logs = logs.search([
+                ('employee_id', '=', rec.employee_id.id),
+                '|',
+                ('user_punch_time', '=', rec.check_in),
+                ('user_punch_time', '=', rec.check_out),
+            ])
+            related_logs.write({'user_punch_calculated': False})
         return super().unlink()
