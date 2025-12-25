@@ -22,10 +22,23 @@ class HrEmployee(models.Model):
         help='List of biometric devices linked to this employee.'
     )
 
+    # Customized by Tunn
+    # arabic_name = fields.Char()
+    # ramadan_resource_calendar_id = fields.Many2one(
+    #     'resource.calendar', string='Ramadan Working Hours', check_company=True)
+    arabic_name = fields.Char(
+        string="Arabic Name",
+        groups="base.group_user" # Internal user
+    )
 
-    arabic_name = fields.Char()
     ramadan_resource_calendar_id = fields.Many2one(
-        'resource.calendar', string='Ramadan Working Hours', check_company=True)
+        'resource.calendar',
+        string='Ramadan Working Hours',
+        check_company=True,
+        groups="base.group_user" # Internal user
+    )
+
+
     leave_line_ids = fields.One2many('employee.leave.line', 'employee_id', string="Leave Lines", tracking=True)
 
 
